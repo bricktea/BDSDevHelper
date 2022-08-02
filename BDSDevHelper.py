@@ -1,5 +1,5 @@
-from glob import glob
 import idaapi
+import idautils
 import ida_nalt
 import pyperclip as pc
 from idc import *
@@ -10,8 +10,6 @@ import tkinter.messagebox as msgBox
 import json
 import xmind
 from xmind.core.const import *
-from xmind.core.markerref import MarkerId
-from xmind.core.topic import TopicElement
 import xml.dom
 import tempfile
 import os
@@ -70,7 +68,8 @@ class Hooks(idaapi.UI_Hooks):
             if not ida_kernwin.register_action(desc):
                 print("[x] Register action '%s' failed!" % action.NAME)
         
-        ida_kernwin.attach_action_to_menu("Edit/BDSDevHelper/Load original data", loadOriginalData.NAME, ida_kernwin.SETMENU_INS)
+        # ida_kernwin.attach_action_to_menu("Edit/BDSDevHelper/Load original data", loadOriginalData.NAME, ida_kernwin.SETMENU_INS)
+        ida_kernwin.attach_action_to_menu("Edit/BDSDevHelper/Export structure", exportStructure.NAME, ida_kernwin.SETMENU_INS)
         # ida_kernwin.attach_action_to_menu("Edit/BDSDevHelper/Generate type tree", genGenealogy.NAME, ida_kernwin.SETMENU_INS)
         
         print('[*] BDS Dev Helper is loaded, ver %s.' % _ver)
@@ -104,6 +103,44 @@ def changeVariableType(ea, lvar, tpe):
 #------------------------------------------------------------------------------
 # Registered Actions
 #------------------------------------------------------------------------------
+
+class exportStructure(ida_kernwin.action_handler_t):
+
+    NAME = "helper:exportStructure"
+    TEXT = "Export all struct."
+    TOOLTIP = "Export all structure information from idb."
+
+    def __init__(self, core):
+        ida_kernwin.action_handler_t.__init__(self)
+        self.core = core
+    
+    def activate(self, ctx):
+        file_name = askFile.asksaveasfilename(
+            title = 'Where to save structure data?',
+            filetypes = [('Json File','*.json'),('All files','*')],
+            initialdir = os.getcwd()
+            )
+        if file_name[len(file_name)-6:] != '.json':
+            file_name = file_name + '.json'
+        j = list()
+        for idx,sid,name in idautils.Structs():
+            members = list()
+            for offset,name,size in idautils.StructMembers(sid):
+                members.append({
+                    'name': name,
+                    'offset': offset,
+                    'size': size
+                })
+            j.append({
+                    'name': name,
+                    'members': members
+                })
+        with open(file_name,'w') as file:
+            file.write(json.dumps(j))
+        print('[+] structure data saved to: %s' % file_name)
+
+    def update(self, ctx):
+        return ida_kernwin.AST_ENABLE_ALWAYS
 
 class genGenealogy(ida_kernwin.action_handler_t):
 
@@ -543,6 +580,7 @@ class asSymCall(ida_kernwin.action_handler_t):
 
 PLUGIN_ACTIONS = \
 [
+    exportStructure,
     genGenealogy,
     loadOriginalData,
     asTHook,
