@@ -100,6 +100,14 @@ def changeVariableType(ea, lvar, tpe):
     lsi.type = tpe
     return modify_user_lvar_info(ea, MLI_TYPE, lsi)
 
+def getMemberType(sid, offset):
+    struct = ida_struct.get_struc(sid)
+    member = ida_struct.get_member(struct, offset)
+    tif = ida_typeinf.tinfo_t()
+    if ida_struct.get_member_tinfo(tif, member):
+        return tif.__str__() 
+    return ""    
+
 #------------------------------------------------------------------------------
 # Registered Actions
 #------------------------------------------------------------------------------
@@ -120,23 +128,47 @@ class exportStructure(ida_kernwin.action_handler_t):
             filetypes = [('Json File','*.json'),('All files','*')],
             initialdir = os.getcwd()
             )
-        if file_name[len(file_name)-6:] != '.json':
+        if file_name[len(file_name)-5:] != '.json':
             file_name = file_name + '.json'
         j = list()
-        for idx,sid,name in idautils.Structs():
-            members = list()
-            for offset,name,size in idautils.StructMembers(sid):
+        added_struct = list()
+        banned_prefix = [
+            '_M',
+            'baseclass_',
+            'vn_',
+            'vna_',
+            'gap',
+            'st_',
+            'std::',
+            'entt::',
+            'Elf'
+        ]
+        for idx,sid,struct in idautils.Structs():
+            struct = str(struct)
+            if struct in added_struct:
+                continue
+            stopAndContinue = False
+            for word in banned_prefix:
+                if struct[:len(word)] == word:
+                    stopAndContinue = True
+                    break
+            if stopAndContinue:
+                continue
+            members = []
+            for offset,mem,size in idautils.StructMembers(sid):
                 members.append({
-                    'name': name,
+                    'name': mem,
+                    'type': getMemberType(sid,offset),
                     'offset': offset,
                     'size': size
                 })
+            added_struct.append(struct)
             j.append({
-                    'name': name,
+                    'struct_name': struct,
                     'members': members
                 })
         with open(file_name,'w') as file:
-            file.write(json.dumps(j))
+            file.write(json.dumps(j,indent=4))
         print('[+] structure data saved to: %s' % file_name)
 
     def update(self, ctx):
