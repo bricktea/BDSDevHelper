@@ -156,8 +156,10 @@ class export(ida_kernwin.action_handler_t):
             'gsl::',
             'grpc::',
             'boost::',
-            'JsonUtil::JsonSchema'
+            'JsonUtil::JsonSchema',
+            'JsonUtil::JsonParseState'
         ]
+        temp_added = dict()
         print('[!] Initialization, %d prefixes will be skipped.' % len(banned_prefix))
 
         # get structure information.
@@ -178,6 +180,7 @@ class export(ida_kernwin.action_handler_t):
                     'offset': offset,
                     'size': size
                 })
+            temp_added[struct] = 1
             j['structure'].append({
                     'struct_name': struct,
                     'members': members
@@ -209,8 +212,40 @@ class export(ida_kernwin.action_handler_t):
                 'enum_name': name,
                 'members': members,
             })
+            temp_added[name] = 1
         print('[+] %d enums are exported.' % len(j['enums']))
 
+        # get local type information(supplement)
+        til = ida_typeinf.get_idati()
+        count = 0
+        for ordinal in range(ida_typeinf.get_ordinal_qty(til)):
+            tinfo = ida_typeinf.tinfo_t()
+            if tinfo.get_numbered_type(til, ordinal):
+                typen = str(tinfo)
+                clss = str()
+                clss2 = str()
+                try:
+                    if tinfo.is_enum():
+                        clss = 'enums'
+                        clss2 = 'enum_name'
+                    elif tinfo.is_struct():
+                        clss = 'structure'
+                        clss2 = 'struct_name'
+                    else:
+                        raise -3
+                    if typen in temp_added:
+                        raise -1
+                    for word in banned_prefix:
+                        if typen[:len(word)] == word:
+                            raise -2
+                except:
+                    continue                
+                j[clss].append({
+                    '%s'%clss2: typen,
+                    'declaration': GetLocalType(ordinal,ida_typeinf.PRTYPE_TYPE + ida_typeinf.PRTYPE_SEMI + ida_typeinf.PRTYPE_MULTI)
+                })
+                count += 1
+        print('[+] %d local types have been added.' % count)
         # save data.
         with open(file_name,'w') as file:
             file.write(json.dumps(j,indent=4))
