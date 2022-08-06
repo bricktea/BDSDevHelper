@@ -78,11 +78,16 @@ for short_name in data['structure']:
             text = text + "-|-|-|-\n"
             for member in struct['members']:
                 name = member['name']
+                type = member['type']
                 if is_stupid(name):
                     name = '?'
-                text = text + "%s | (%s) `%s` | %s\n" % (member['offset'],member['size'],member['type'],name)
+                if is_stupid(type):
+                    type = '?'
+                text = text + "%s | (%s) `%s` | %s\n" % (member['offset'],member['size'],type,name)
             text = text + "\n\n"
         else:
+            if is_stupid(struct['declaration']):
+                continue
             text = text + "### `%s`\n" % struct['struct_name']
             text = text + "```\n%s\n```\n\n" % struct['declaration']
         try_save()
@@ -118,6 +123,8 @@ for short_name in data['enums']:
                 text = text + "%s | `%s`\n" % (name,member['value'])
             text = text + "\n\n"
         else:
+            if is_stupid(enum['declaration']):
+                continue
             text = text + "### `%s`\n" % enum['enum_name']
             text = text + "```\n%s\n```\n\n" % enum['declaration']
         try_save()
