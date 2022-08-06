@@ -10,7 +10,7 @@ import tkinter.messagebox as msgBox
 import json
 import os
 
-_ver = '1.1.0'
+_ver = '1.2.0'
 _call = '__fastcall'
 
 #------------------------------------------------------------------------------
