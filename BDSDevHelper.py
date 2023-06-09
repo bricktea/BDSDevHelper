@@ -162,7 +162,7 @@ class exportAllSize(ida_kernwin.action_handler_t):
                 'final_guessed_size': 0
             }
         first_valid_types_count = len(valid_types)
-        print('[+] found %d valid types.' % first_valid_types_count)
+        print('[+] Found %d valid types.' % first_valid_types_count)
         # get all functions
         count = ida_name.get_nlist_size()
         all_constructor_count = 0
@@ -205,7 +205,7 @@ class exportAllSize(ida_kernwin.action_handler_t):
                             'references': list(set(matched))
                         }
                         matched_count += 1
-        print('[+] found %d constructors, matched %d (%.2f%%)' % (all_constructor_count, matched_count, matched_count / all_constructor_count * 100))
+        print('[+] Found %d constructors, matched %d (%.2f%%)' % (all_constructor_count, matched_count, matched_count / all_constructor_count * 100))
         for i in list(valid_types.keys()):
             if len(valid_types[i]['matched_constructors']) == 0:
                 valid_types.pop(i)
@@ -260,7 +260,7 @@ class exportAllSize(ida_kernwin.action_handler_t):
                                     offset = int(res.group(3))
                                     size = offset * type2size(type2) + type2size(type1)
                     if size == 0:
-                        print('[!] unmatched expression found: %s' % ref)
+                        print('[!] Unmatched expression found: %s' % ref)
                         raise -1
                     if size > largest:
                         largest = size
@@ -279,7 +279,7 @@ class exportAllSize(ida_kernwin.action_handler_t):
         # save data.
         with open(file_name, 'w') as file:
             file.write(json.dumps(valid_types, indent = 4))
-        print('[+] data saved to: %s' % file_name)
+        print('[+] Data saved to: %s' % file_name)
 
     def update(self, ctx):
         return ida_kernwin.AST_ENABLE_ALWAYS
@@ -417,7 +417,7 @@ class exportTIL(ida_kernwin.action_handler_t):
         # save data.
         with open(file_name, 'w') as file:
             file.write(json.dumps(j, indent=4))
-        print('[+] data saved to: %s' % file_name)
+        print('[+] Data saved to: %s' % file_name)
 
     def update(self, ctx):
         return ida_kernwin.AST_ENABLE_ALWAYS
@@ -436,13 +436,13 @@ class asTHook(ida_kernwin.action_handler_t):
     def activate(self, ctx):
         ea = here()
         if ea == idaapi.BADADDR:
-            print('[x] cannot get here ea.')
+            print('[x] Get ea failed.')
             return
 
         # get function.
         symbol = get_name(ea)
         if not symbol or symbol == '':
-            print('[x] cannot get symbol.')
+            print('[x] Get symbol failed.')
             return
         func_data = decompile(ea)
         func_detail = str(func_data.type)
@@ -501,13 +501,13 @@ class asTInstanceHook(ida_kernwin.action_handler_t):
     def activate(self, ctx):
         ea = here()
         if ea == idaapi.BADADDR:
-            print('[x] cannot get here ea.')
+            print('[x] Get ea failed.')
             return
 
         # get function.
         symbol = get_name(ea)
         if not symbol or symbol == '':
-            print('[x] cannot get symbol.')
+            print('[x] Get symbol failed.')
             return
         func_data = decompile(ea)
         func_detail = str(func_data.type)
@@ -567,13 +567,13 @@ class asTClasslessInstanceHook(ida_kernwin.action_handler_t):
     def activate(self, ctx):
         ea = here()
         if ea == idaapi.BADADDR:
-            print('[x] cannot get here ea.')
+            print('[x] Get ea failed.')
             return
 
         # get function.
         symbol = get_name(ea)
         if not symbol or symbol == '':
-            print('[x] cannot get symbol.')
+            print('[x] Get symbol failed.')
             return
         func_data = decompile(ea)
         func_detail = str(func_data.type)
@@ -634,13 +634,13 @@ class asSymCall(ida_kernwin.action_handler_t):
     def activate(self, ctx):
         ea = here()
         if ea == idaapi.BADADDR:
-            print('[x] cannot get here ea.')
+            print('[x] Get ea failed.')
             return
 
         # get function.
         symbol = get_name(ea)
         if not symbol or symbol == '':
-            print('[x] cannot get symbol.')
+            print('[x] Get symbol failed.')
             return
         func_data = decompile(ea)
         func_detail = str(func_data.type)
