@@ -96,13 +96,6 @@ class Utils():
         return rtn.strip()
 
     @staticmethod
-    def changeVariableType(ea, lvar, tpe):
-        lsi = lvar_saved_info_t()
-        lsi.ll = lvar
-        lsi.type = tpe
-        return modify_user_lvar_info(ea, MLI_TYPE, lsi)
-
-    @staticmethod
     def getMemberType(sid, offset):
         struct = ida_struct.get_struc(sid)
         member = ida_struct.get_member(struct, offset)
@@ -294,8 +287,8 @@ class exportAllSize(ida_kernwin.action_handler_t):
 class exportTIL(ida_kernwin.action_handler_t):
 
     NAME = 'helper:export'
-    TEXT = 'Export all TIL information.'
-    TOOLTIP = 'Export all structure&enums&types information from idb.'
+    TEXT = 'Export all til information.'
+    TOOLTIP = 'Export all structure & enums & local types information from idb.'
 
     def __init__(self, core):
         ida_kernwin.action_handler_t.__init__(self)
