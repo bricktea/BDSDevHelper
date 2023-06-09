@@ -31,6 +31,9 @@ An IDA plugin to help you develop with bedrock dedicated server, designed specif
 > 2. Go to Edit/BDSDevHelper/Analyze... to analyze and generate structure size data.
 > 3. You can use TilChangedReporter.py to generate reporter from the exported data.
 
+> ⚠ **WARNNING** 
+> *By analyzing the size of a structure through its constructor, the result may not be accurate and should only be used as a reference. Factors such as memory alignment, virtual functions, and inheritance can lead to errors.*
+
 ### ATTENTION
  - **Only** use to analyze BDS.
  - MIT License.
